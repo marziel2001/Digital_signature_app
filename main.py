@@ -1,3 +1,5 @@
+import hashlib
+
 import rsa
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad, unpad
@@ -6,20 +8,28 @@ from hashlib import sha256
 
 
 def gen_and_save_keys():
-    (pub_key, priv_key) = rsa.newkeys(256)  # 4096 will be used to sign the hash
-    print(f'Public key: {pub_key}, \nPrivate key: {priv_key}')
+    print("please provide the drive letter")
+    drive = input()
+
+    (pub_key, priv_key) = rsa.newkeys(256) # 4096 will be used to sign the hash
+    #print(f"pub key {pub_key}, priv key {priv_key}")
 
     with open('pub.pem', 'w') as pubKeyFile:
         pubKeyFile.write(pub_key.save_pkcs1().decode('utf8'))
 
     encrypted_key = cipher_w_aes(priv_key.save_pkcs1('DER'), '1111')
 
-    with open('priv.pem.aes', 'wb') as privKeyFile:
+    #todo in the end change path to drive/:priv.pem.aes
+    with open(drive + 'priv.pem.aes', 'wb') as privKeyFile:
         privKeyFile.write(encrypted_key)
 
 
 def load_keys():
-    with open('priv.pem.aes', "rb") as privKeyFile:
+    print("please provide the drive letter")
+    drive = input()
+
+    #todo in the end change path to drive/:priv.pem.aes
+    with open(drive + 'priv.pem.aes', "rb") as privKeyFile:
         priv_key_2 = privKeyFile.read()
 
     with open('pub.pem') as pubKeyFile:
@@ -32,6 +42,7 @@ def load_keys():
     privkey2reloaded = rsa.PrivateKey._load_pkcs1_der(priv_key_2_decoded)
 
     return pub_key_2_reloaded, privkey2reloaded
+
 
 def compute_hash(PIN):
     return sha256(PIN.encode('utf8')).digest()
@@ -56,9 +67,41 @@ def decipher_w_aes(encrypted_content, PIN):
     unpadded_content = unpad(decrypted_content, 16)
     return unpadded_content
 
-gen_and_save_keys()
-loaded_pub_key, loaded_privkey = load_keys()
 
-print(f"loaded pub key {loaded_pub_key}, loaded priv key {loaded_privkey}")
+def encrypt_with_rsa():
+    pass
+
+
+def hash_file():
+    file = "./requirements.txt"
+    BLOCK_SIZE = 65536
+
+    hash = hashlib.sha256()
+    with open(file, 'rb') as f:
+        fb = f.read(BLOCK_SIZE)
+        while len(fb) > 0:
+            hash.update(fb)
+            fb = f.read(BLOCK_SIZE)
+
+    print(hash.hexdigest())
+
+print("Enter mode:\n" +
+      "1. Generating RSA keys\n" +
+      "2. Loading keys\n" +
+      "3. Encrypting a document\n")
+
+mode = input()
+
+if mode == '1':
+    gen_and_save_keys()
+
+if mode == '2':
+    loaded_pub_key, loaded_privkey = load_keys()
+    print(f"loaded pub key {loaded_pub_key}, loaded priv key {loaded_privkey}")
+
+if mode == '3':
+    hash_file()
+
+
 
 
