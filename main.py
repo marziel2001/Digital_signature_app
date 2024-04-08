@@ -1,46 +1,53 @@
 import hashlib
-import sys
-
 import rsa
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad, unpad
 from Cryptodome.Random import get_random_bytes
 from hashlib import sha256
 
+SHA_BLOCK_SIZE = 65536
+
+
+def choose_drive():
+    print("please provide the drive letter")
+    drive = input()
+
+    if drive is not "":
+        drive += "/"
+
+    return drive
 
 
 def gen_and_save_keys():
-    print("please provide the drive letter")
-    drive = input()
+    drive = choose_drive()
 
     (pub_key, priv_key) = rsa.newkeys(2048) # 4096 will be used to sign the hash
     #print(f"pub key {pub_key}, priv key {priv_key}")
 
-    with open('pub.pem', 'w') as pubKeyFile:
+    with open(drive + 'pub.pem', 'w') as pubKeyFile:
         pubKeyFile.write(pub_key.save_pkcs1().decode('utf8'))
 
     encrypted_key = cipher_w_aes(priv_key.save_pkcs1('DER'), '1111')
 
-    #todo in the end change path to drive/:priv.pem.aes
     with open(drive + 'priv.pem.aes', 'wb') as privKeyFile:
         privKeyFile.write(encrypted_key)
 
+    with open(drive + 'priv.pem', 'w') as f:
+        f.write(priv_key.save_pkcs1().decode('utf8'))
+
 
 def load_keys():
-    print("please provide the drive letter")
-    drive = input()
+    drive = choose_drive()
 
-    #todo in the end change path to drive/:priv.pem.aes
-    with open(drive + 'priv.pem.aes', "rb") as privKeyFile:
-        priv_key_2 = privKeyFile.read()
+    with open(drive + 'priv.pem.aes', "rb") as f:
+        priv_key_2 = f.read()
 
-    with open('pub.pem') as pubKeyFile:
-        pub_key_2 = pubKeyFile.read()
+    with open('pub.pem') as f:
+        pub_key_2 = f.read()
 
     pub_key_2_reloaded = rsa.PublicKey.load_pkcs1(pub_key_2.encode('utf8'))
 
     priv_key_2_decoded = decipher_w_aes(priv_key_2, '1111')
-
     privkey2reloaded = rsa.PrivateKey._load_pkcs1_der(priv_key_2_decoded)
 
     return pub_key_2_reloaded, privkey2reloaded
@@ -70,61 +77,66 @@ def decipher_w_aes(encrypted_content, PIN):
     return unpadded_content
 
 
-def encrypt_with_rsa(hash, key):
-    signature = rsa.encrypt(hash, key)
-    with open('signature.sha256.rsa', 'wb') as f:
-        f.write(signature)
-
-
-    print("len of signature: " + str(len(signature)))
+def encrypt_with_rsa(content, key):
+    signature = rsa.encrypt(content, key)
     return signature
 
 
-def verify_signature(file="./signature.sha256.rsa"):
-    loaded_pub_key, loaded_privkey = load_keys()
-    hash = hash_file()
-    signature = encrypt_with_rsa(hash, loaded_pub_key)
-    with open(file, "rb") as f:
-        sig_to_check = f.read()
-
-    if signature == sig_to_check:
-        print("sygnatury się zgadzają!\n")
+def decrypt_with_rsa(encrypted_content, key):
+    decrypted_content = rsa.decrypt(encrypted_content, key)
+    return decrypted_content
 
 
-def hash_file(file="./requirements.txt"):
-    BLOCK_SIZE = 65536
+def verify_signature(signature_file, public_key):
+    # computing hash of received file
+    our_hash = hash_file()
 
-    hash = hashlib.sha256()
+    # decrypting received hash
+    their_hash = decrypt_with_rsa(signature_file, public_key)
+
+    if our_hash == their_hash:
+        print("hashes match!")
+    else:
+        print("somebody tried to trick us!")
+
+
+def hash_file(file):
+    _hash = hashlib.sha256()
     with open(file, 'rb') as f:
-        fb = f.read(BLOCK_SIZE)
+        fb = f.read(SHA_BLOCK_SIZE)
         while len(fb) > 0:
-            hash.update(fb)
-            fb = f.read(BLOCK_SIZE)
+            _hash.update(fb)
+            fb = f.read(SHA_BLOCK_SIZE)
 
-    print("hash: " + hash.hexdigest())
-    return hash.digest()
+    print("hash: " + _hash.hexdigest())
+    return _hash.digest()
 
 print("Enter mode:\n" +
-      "1. Generating RSA keys\n" +
-      "2. Loading keys\n" +
-      "3. Encrypting a document\n")
+      "1. Generating & saving RSA keys\n" +
+      "2. Loading & printing RSA keys\n" +
+      "3. Hashing\n" +
+      "4. Signing & saving to a file\n" +
+      "5. Veryfying signature\n")
 
 mode = input()
 
 if mode == '1':
     gen_and_save_keys()
+
 if mode == '2':
     loaded_pub_key, loaded_privkey = load_keys()
     print(f"loaded pub key {loaded_pub_key}, loaded priv key {loaded_privkey}")
+
 if mode == '3':
     hash_file()
+
 if mode == '4':
-    _, loaded_privkey = load_keys()
-    hash = hash_file()
-    encrypt_with_rsa(hash, loaded_privkey)
+    _, loaded_priv_key = load_keys()
+    _hash = hash_file()
+    sign = encrypt_with_rsa(_hash, loaded_priv_key)
+
+    with open('signature.sha256.rsa', 'wb') as f:
+        f.write(sign)
+
 if mode == '5':
     verify_signature()
-
-
-
-
