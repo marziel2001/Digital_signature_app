@@ -12,45 +12,54 @@ def choose_drive():
     print("please provide the drive letter")
     drive = input()
 
-    if drive is not "":
+    if drive != "":
         drive += "/"
 
     return drive
 
 
+def enter_PIN():
+    print("Please set your 4 digit PIN")
+    PIN = input()
+    return PIN
+
+
 def gen_and_save_keys():
     drive = choose_drive()
 
-    (pub_key, priv_key) = rsa.newkeys(2048) # 4096 will be used to sign the hash
-    #print(f"pub key {pub_key}, priv key {priv_key}")
+    # todo use 4096 in the final version
+    (pub_key, priv_key) = rsa.newkeys(2048)
 
-    with open(drive + 'pub.pem', 'w') as pubKeyFile:
-        pubKeyFile.write(pub_key.save_pkcs1().decode('utf8'))
+    with open(drive + 'pub.pem', 'w') as f:
+        f.write(pub_key.save_pkcs1().decode('utf8'))
 
-    encrypted_key = cipher_w_aes(priv_key.save_pkcs1('DER'), '1111')
+    encrypted_key = cipher_w_aes(priv_key.save_pkcs1('DER'), enter_PIN())
 
-    with open(drive + 'priv.pem.aes', 'wb') as privKeyFile:
-        privKeyFile.write(encrypted_key)
-
-    with open(drive + 'priv.pem', 'w') as f:
-        f.write(priv_key.save_pkcs1().decode('utf8'))
+    with open(drive + 'priv.pem.aes', 'wb') as f:
+        f.write(encrypted_key)
 
 
-def load_keys():
+def load_private_key():
     drive = choose_drive()
 
     with open(drive + 'priv.pem.aes', "rb") as f:
         priv_key_2 = f.read()
 
-    with open('pub.pem') as f:
+    priv_key_2_decoded = decipher_w_aes(priv_key_2, enter_PIN())
+    privkey2reloaded = rsa.PrivateKey._load_pkcs1_der(priv_key_2_decoded)
+
+    return privkey2reloaded
+
+
+def load_public_key():
+    drive = choose_drive()
+
+    with open(drive + 'pub.pem') as f:
         pub_key_2 = f.read()
 
     pub_key_2_reloaded = rsa.PublicKey.load_pkcs1(pub_key_2.encode('utf8'))
 
-    priv_key_2_decoded = decipher_w_aes(priv_key_2, '1111')
-    privkey2reloaded = rsa.PrivateKey._load_pkcs1_der(priv_key_2_decoded)
-
-    return pub_key_2_reloaded, privkey2reloaded
+    return pub_key_2_reloaded
 
 
 def compute_hash(PIN):
@@ -116,7 +125,8 @@ print("Enter mode:\n" +
       "2. Loading & printing RSA keys\n" +
       "3. Hashing\n" +
       "4. Signing & saving to a file\n" +
-      "5. Veryfying signature\n")
+      "5. Veryfying signature\n"
+      "6. Test general purpose encryption & decryption")
 
 mode = input()
 
@@ -124,14 +134,15 @@ if mode == '1':
     gen_and_save_keys()
 
 if mode == '2':
-    loaded_pub_key, loaded_privkey = load_keys()
+    loaded_pub_key = load_public_key()
+    loaded_privkey = load_private_key()
     print(f"loaded pub key {loaded_pub_key}, loaded priv key {loaded_privkey}")
 
 if mode == '3':
-    hash_file()
+    hash_file("Test na BSK.pdf")
 
 if mode == '4':
-    _, loaded_priv_key = load_keys()
+    loaded_priv_key = load_private_key()
     _hash = hash_file()
     sign = encrypt_with_rsa(_hash, loaded_priv_key)
 
@@ -140,3 +151,32 @@ if mode == '4':
 
 if mode == '5':
     verify_signature()
+
+if mode == '6':
+    gen_and_save_keys()
+
+    file = "test.html"
+
+    with open(file, 'rb') as f:
+        fb = f.read()
+
+    pub_key = load_public_key()
+
+    encrypted_content = encrypt_with_rsa(fb, pub_key)
+
+    with open(file + ".rsa", 'wb') as f:
+        f.write(encrypted_content)
+
+    with open(file + ".rsa", 'rb') as f:
+        fb2 = f.read()
+
+    priv_key = load_private_key()
+
+    print(priv_key)
+
+    decrypted_content = decrypt_with_rsa(fb2, priv_key)
+
+    with open(file + "decrypted.html", 'wb') as f:
+        f.write(decrypted_content)
+
+
