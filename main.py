@@ -1,11 +1,12 @@
-import hashlib
 import rsa
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad, unpad
 from Cryptodome.Random import get_random_bytes
-from hashlib import sha256
+
+from rsa import VerificationError
 
 SHA_BLOCK_SIZE = 65536
+RSA_KEY_SIZE = 2048
 
 
 def choose_drive():
@@ -19,7 +20,7 @@ def choose_drive():
 
 
 def enter_PIN():
-    print("Please set your 4 digit PIN")
+    print("Please enter your 4 digit PIN")
     PIN = input()
     return PIN
 
@@ -28,7 +29,7 @@ def gen_and_save_keys():
     drive = choose_drive()
 
     # todo use 4096 in the final version
-    (pub_key, priv_key) = rsa.newkeys(2048)
+    (pub_key, priv_key) = rsa.newkeys(RSA_KEY_SIZE)
 
     with open(drive + 'pub.pem', 'w') as f:
         f.write(pub_key.save_pkcs1().decode('utf8'))
@@ -63,7 +64,8 @@ def load_public_key():
 
 
 def compute_hash(PIN):
-    return sha256(PIN.encode('utf8')).digest()
+    return rsa.compute_hash(PIN.encode('utf8'), 'SHA-256')
+
 
 
 def cipher_w_aes(content, PIN):
@@ -86,44 +88,53 @@ def decipher_w_aes(encrypted_content, PIN):
     return unpadded_content
 
 
+def sign(hash, key):
+    return rsa.sign_hash(hash, key, 'SHA-256')
+
+
 def encrypt_with_rsa(content, key):
     signature = rsa.encrypt(content, key)
+
+    with open('signature.sha256.rsa', 'wb') as f:
+        f.write(signature)
+
     return signature
 
 
 def decrypt_with_rsa(encrypted_content, key):
-    decrypted_content = rsa.decrypt(encrypted_content, key)
+    with open(encrypted_content, 'rb') as f:
+        fb = f.read()
+
+    decrypted_content = rsa.decrypt(fb, key)
     return decrypted_content
 
 
-def verify_signature(signature_file, public_key):
-    # computing hash of received file
-    our_hash = hash_file()
+def verify_signature(file, signature_file, public_key):
+    with open(file, 'rb') as f:
+        original = f.read()
 
-    # decrypting received hash
-    their_hash = decrypt_with_rsa(signature_file, public_key)
+    with open(signature_file, 'rb') as f:
+        signature = f.read()
 
-    if our_hash == their_hash:
-        print("hashes match!")
+    try:
+        rsa.verify(original, signature, public_key)
+    except VerificationError:
+        print("Podrobiono plik")
     else:
-        print("somebody tried to trick us!")
+        print("Pliki się zgadzają")
+
 
 
 def hash_file(file):
-    _hash = hashlib.sha256()
     with open(file, 'rb') as f:
-        fb = f.read(SHA_BLOCK_SIZE)
-        while len(fb) > 0:
-            _hash.update(fb)
-            fb = f.read(SHA_BLOCK_SIZE)
+        fb = f.read()
 
-    print("hash: " + _hash.hexdigest())
-    return _hash.digest()
+    _hash = rsa.compute_hash(fb, 'SHA-256')
+    return _hash
 
 print("Enter mode:\n" +
       "1. Generating & saving RSA keys\n" +
       "2. Loading & printing RSA keys\n" +
-      "3. Hashing\n" +
       "4. Signing & saving to a file\n" +
       "5. Veryfying signature\n"
       "6. Test general purpose encryption & decryption")
@@ -138,19 +149,18 @@ if mode == '2':
     loaded_privkey = load_private_key()
     print(f"loaded pub key {loaded_pub_key}, loaded priv key {loaded_privkey}")
 
-if mode == '3':
-    hash_file("Test na BSK.pdf")
-
 if mode == '4':
     loaded_priv_key = load_private_key()
-    _hash = hash_file()
-    sign = encrypt_with_rsa(_hash, loaded_priv_key)
+
+    _hash = hash_file("requirements.txt")
+
+    sign = sign(_hash, loaded_priv_key)
 
     with open('signature.sha256.rsa', 'wb') as f:
         f.write(sign)
 
 if mode == '5':
-    verify_signature()
+    verify_signature("requirements.txt", "signature.sha256.rsa", load_public_key())
 
 if mode == '6':
     gen_and_save_keys()
@@ -178,5 +188,27 @@ if mode == '6':
 
     with open(file + "decrypted.html", 'wb') as f:
         f.write(decrypted_content)
+
+
+def create_xml():
+    import xml.etree.ElementTree as ET
+
+    data = ET.Element('korzen')
+
+    el1 = ET.SubElement(data, 'pierwszy')
+    el2 = ET.SubElement(data, 'drugi')
+
+    el3 = ET.SubElement(el1, 'trzeciWPierwszym')
+
+    el1.text = 'tekst pierwszego'
+    el2.text = 'tekst drugiego'
+    el3.text = 'tekst trzeciego'
+
+    el1.set('atrybut1', 'Wartosc')
+
+    bxml = ET.tostring(data)
+
+    with open("GFG.xml", "wb") as f:
+        f.write(bxml)
 
 
