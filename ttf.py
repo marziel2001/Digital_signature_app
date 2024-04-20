@@ -6,9 +6,7 @@ from helper import choose_drive
 from helper import hash_pin
 from helper import enter_pin
 from globals import AES_BLOCK_SIZE
-
-# todo use 4096 in the final version
-RSA_KEY_SIZE = 2048
+from globals import RSA_KEY_SIZE
 
 
 def cipher_w_aes(content, pin):

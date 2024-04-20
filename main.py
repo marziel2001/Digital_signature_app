@@ -29,13 +29,7 @@ def load_public_key():
         pub_key_2 = f.read()
 
     pub_key_2_reloaded = rsa.PublicKey.load_pkcs1(pub_key_2.encode('utf8'))
-
     return pub_key_2_reloaded
-
-
-
-
-
 
 
 def decipher_w_aes(encrypted_content, PIN):
@@ -48,12 +42,13 @@ def decipher_w_aes(encrypted_content, PIN):
     return unpadded_content
 
 
-def sign(hash, key):
-    return rsa.sign_hash(hash, key, 'SHA-256')
+def sign_hash(hash, key):
+    signature = rsa.sign_hash(hash, key, 'SHA-256')
+    return signature
 
 
-def general_purpose_encrypt_rsa(content, key):
-    signature = rsa.encrypt(content, key)
+def general_purpose_encrypt_rsa(content, public_key):
+    signature = rsa.encrypt(content, public_key)
 
     with open('signature.sha256.rsa', 'wb') as f:
         f.write(signature)
@@ -61,11 +56,11 @@ def general_purpose_encrypt_rsa(content, key):
     return signature
 
 
-def general_purpose_decrypt_rsa(encrypted_content, key):
+def general_purpose_decrypt_rsa(encrypted_content, private_key):
     with open(encrypted_content, 'rb') as f:
         fb = f.read()
 
-    decrypted_content = rsa.decrypt(fb, key)
+    decrypted_content = rsa.decrypt(fb, private_key)
     return decrypted_content
 
 
@@ -74,7 +69,7 @@ def verify_signature(file_to_check, signature_file, public_key):
         original = f.read()
 
     with open(signature_file, 'rb') as f:
-        signature = f.read()
+        signature = f.read() # todo: change to separate function that reads signature from xml tag
 
     try:
         rsa.verify(original, signature, public_key)
@@ -123,21 +118,29 @@ def create_xml():
         f.write(bxml)
 
 
+def sign_document(filename):
+    loaded_priv_key = load_private_key()
+    _hash = hash_file(filename)
+    signature = sign_hash(_hash, loaded_priv_key)
+
+    create_xml() # todo: pass parameters and fill up the xml corretly
+
+    with open('signature.sha256.rsa', 'wb') as f:
+        f.write(signature)
+
+
+
 print("Enter mode:\n" +
       "1. Signing a document\n" +
       "2. Veryfying signature\n" +
       "3. Test general purpose encryption & decryption\n" +
-      "7. Generate XML document\n")
+      "4. Generate XML document\n")
 
 mode = input()
 
 if mode == '1':
-    loaded_priv_key = load_private_key()
-    _hash = hash_file("requirements.txt")
-    signature = sign(_hash, loaded_priv_key)
-
-    with open('signature.sha256.rsa', 'wb') as f:
-        f.write(signature)
+    filename = input("Enter filename to sign")
+    sign_document(filename)
 
 if mode == '2':
     filename = input("Enter filename to verify")
