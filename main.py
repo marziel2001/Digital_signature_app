@@ -13,7 +13,9 @@ from globals import AES_BLOCK_SIZE
 def load_private_key():
     drive = choose_drive()
 
-    with open(drive + 'priv.pem.aes', "rb") as f:
+    filename = 'priv.pem.aes'
+
+    with open(drive + filename, "rb") as f:
         priv_key_2 = f.read()
 
     priv_key_2_decoded = decipher_w_aes(priv_key_2, enter_pin())
@@ -24,8 +26,9 @@ def load_private_key():
 
 def load_public_key():
     drive = choose_drive()
+    filename = 'pub.pem'
 
-    with open(drive + 'pub.pem') as f:
+    with open(drive + filename) as f:
         pub_key_2 = f.read()
 
     pub_key_2_reloaded = rsa.PublicKey.load_pkcs1(pub_key_2.encode('utf8'))
@@ -47,20 +50,29 @@ def sign_hash(hash, key):
     return signature
 
 
-def general_purpose_encrypt_rsa(content, public_key):
-    signature = rsa.encrypt(content, public_key)
+def general_purpose_encrypt_rsa(filename="test.html"):
+    pub_key = load_public_key()
 
-    with open('signature.sha256.rsa', 'wb') as f:
-        f.write(signature)
-
-    return signature
-
-
-def general_purpose_decrypt_rsa(encrypted_content, private_key):
-    with open(encrypted_content, 'rb') as f:
+    with open(filename, 'rb') as f:
         fb = f.read()
 
-    decrypted_content = rsa.decrypt(fb, private_key)
+    encrypted_content = rsa.encrypt(fb, pub_key)
+
+    with open(filename + ".rsa", 'wb') as f:
+        f.write(encrypted_content)
+
+
+def general_purpose_decrypt_rsa(encrypted_content_filename="test.html.rsa"):
+    with open(encrypted_content_filename, 'rb') as f:
+        fb = f.read()
+
+    priv_key = load_private_key()
+
+    decrypted_content = rsa.decrypt(fb, priv_key)
+
+    with open(encrypted_content_filename.removesuffix('.rsa'), 'wb') as f:
+        f.write(decrypted_content)
+
     return decrypted_content
 
 
@@ -133,8 +145,9 @@ def sign_document(filename):
 print("Enter mode:\n" +
       "1. Signing a document\n" +
       "2. Veryfying signature\n" +
-      "3. Test general purpose encryption & decryption\n" +
-      "4. Generate XML document\n")
+      "3. Test general purpose encryption \n" +
+      "4. Test general purpose decryption \n" +
+      "5. Generate XML document\n")
 
 mode = input()
 
@@ -147,26 +160,10 @@ if mode == '2':
     verify_signature(filename, "signature.sha256.rsa", load_public_key())
 
 if mode == '3':
-    file = "test.html"
-
-    with open(file, 'rb') as f:
-        fb = f.read()
-
-    pub_key = load_public_key()
-
-    encrypted_content = general_purpose_encrypt_rsa(fb, pub_key)
-
-    with open(file + ".rsa", 'wb') as f:
-        f.write(encrypted_content)
-
-    with open(file + ".rsa", 'rb') as f:
-        fb2 = f.read()
-
-    priv_key = load_private_key()
-    decrypted_content = general_purpose_decrypt_rsa(fb2, priv_key)
-
-    with open(file + "decrypted.html", 'wb') as f:
-        f.write(decrypted_content)
+    general_purpose_encrypt_rsa()
 
 if mode == '4':
+    general_purpose_decrypt_rsa()
+
+if mode == '5':
     create_xml()
