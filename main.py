@@ -2,13 +2,16 @@ import rsa
 from rsa import VerificationError
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import unpad
+
+import globals
 from helper import hash_pin
-from helper import choose_drive
+from helper import choose_file
+from helper import choose_directory
 from helper import enter_pin
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from globals import AES_BLOCK_SIZE
-
+import main_gui
 
 def get_priv_key(filename='priv.pem.aes'):
     drive = choose_drive()
@@ -149,21 +152,25 @@ print("Enter mode:\n" +
       "4. Test general purpose decryption \n" +
       "5. Generate XML document\n")
 
-mode = input()
 
-if mode == '1':
-    filename = input("Enter filename to sign")
-    sign_document(filename)
+if globals.GUI_MODE == 0:
+    mode = input()
 
-if mode == '2':
-    filename = input("Enter filename to verify")
-    verify_signature(filename, "signature.sha256.rsa", get_pub_key())
+    if mode == '1':
+        filename = input("Enter filename to sign")
+        sign_document(filename)
 
-if mode == '3':
-    general_purpose_encrypt_rsa()
+    if mode == '2':
+        filename = input("Enter filename to verify")
+        verify_signature(filename, "signature.sha256.rsa", get_pub_key())
 
-if mode == '4':
-    general_purpose_decrypt_rsa()
+    if mode == '3':
+        general_purpose_encrypt_rsa()
 
-if mode == '5':
-    create_xml()
+    if mode == '4':
+        general_purpose_decrypt_rsa()
+
+    if mode == '5':
+        create_xml()
+else:
+    gui = main_gui.MainGui()
