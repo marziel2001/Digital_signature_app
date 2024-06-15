@@ -2,7 +2,7 @@ import rsa
 from Cryptodome.Random import get_random_bytes
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad
-from helper import choose_drive
+from helper import choose_directory
 from helper import hash_pin
 from helper import enter_pin
 from globals import AES_BLOCK_SIZE
@@ -20,16 +20,18 @@ def cipher_w_aes(content, pin):
 
 
 def generate_and_save_keys():
-    drive = choose_drive()
+    location = choose_directory()
+
+    print(location)
 
     (pub_key, priv_key) = rsa.newkeys(RSA_KEY_SIZE)
 
-    with open(drive + 'pub.pem', 'w') as f:
+    with open(location + 'pub.pem', 'w') as f:
         f.write(pub_key.save_pkcs1().decode('utf8'))
 
     encrypted_key = cipher_w_aes(priv_key.save_pkcs1('DER'), enter_pin())
 
-    with open(drive + 'priv.pem.aes', 'wb') as f:
+    with open(location + 'priv.pem.aes', 'wb') as f:
         f.write(encrypted_key)
 
 

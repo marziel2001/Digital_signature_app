@@ -10,12 +10,12 @@ from datetime import datetime
 from globals import AES_BLOCK_SIZE
 
 
-def load_private_key():
+def get_priv_key(filename='priv.pem.aes'):
     drive = choose_drive()
 
-    filename = 'priv.pem.aes'
+    fn = filename
 
-    with open(drive + filename, "rb") as f:
+    with open(drive + fn, "rb") as f:
         priv_key_2 = f.read()
 
     priv_key_2_decoded = decipher_w_aes(priv_key_2, enter_pin())
@@ -24,11 +24,11 @@ def load_private_key():
     return privkey2reloaded
 
 
-def load_public_key():
+def get_pub_key(filename='pub.pem'):
     drive = choose_drive()
-    filename = 'pub.pem'
+    fn = filename
 
-    with open(drive + filename) as f:
+    with open(drive + fn) as f:
         pub_key_2 = f.read()
 
     pub_key_2_reloaded = rsa.PublicKey.load_pkcs1(pub_key_2.encode('utf8'))
@@ -45,13 +45,13 @@ def decipher_w_aes(encrypted_content, PIN):
     return unpadded_content
 
 
-def sign_hash(hash, key):
+def __sign_hash__(hash, key):
     signature = rsa.sign_hash(hash, key, 'SHA-256')
     return signature
 
 
 def general_purpose_encrypt_rsa(filename="test.html"):
-    pub_key = load_public_key()
+    pub_key = get_pub_key()
 
     with open(filename, 'rb') as f:
         fb = f.read()
@@ -66,7 +66,7 @@ def general_purpose_decrypt_rsa(encrypted_content_filename="test.html.rsa"):
     with open(encrypted_content_filename, 'rb') as f:
         fb = f.read()
 
-    priv_key = load_private_key()
+    priv_key = get_priv_key()
 
     decrypted_content = rsa.decrypt(fb, priv_key)
 
@@ -91,7 +91,7 @@ def verify_signature(file_to_check, signature_file, public_key):
         print("Plik jest oryginalny")
 
 
-def hash_file(file):
+def __hash_file__(file):
     with open(file, 'rb') as f:
         fb = f.read()
 
@@ -131,9 +131,9 @@ def create_xml():
 
 
 def sign_document(filename):
-    loaded_priv_key = load_private_key()
-    _hash = hash_file(filename)
-    signature = sign_hash(_hash, loaded_priv_key)
+    loaded_priv_key = get_priv_key()
+    _hash = __hash_file__(filename)
+    signature = __sign_hash__(_hash, loaded_priv_key)
 
     create_xml() # todo: pass parameters and fill up the xml corretly
 
@@ -157,7 +157,7 @@ if mode == '1':
 
 if mode == '2':
     filename = input("Enter filename to verify")
-    verify_signature(filename, "signature.sha256.rsa", load_public_key())
+    verify_signature(filename, "signature.sha256.rsa", get_pub_key())
 
 if mode == '3':
     general_purpose_encrypt_rsa()
