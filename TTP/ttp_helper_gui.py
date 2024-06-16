@@ -6,9 +6,9 @@ class LocationChooser:
     location = ""
     location_type = "directory"
 
-    def __init__(self, location_type, of_what, update_location):
+    def __init__(self, location_type, of_what):
         self.location_type = location_type
-        self.window = tk.Toplevel()
+        self.window = tk.Tk()
         self.window.title("Choose_location")
 
         self.window.rowconfigure([0, 1], weight=1, minsize=50)
@@ -27,10 +27,10 @@ class LocationChooser:
         self.btn2.pack()
 
         self.ret_location_button = tk.Button(text="save_location", master=self.frame1,
-                                             bg='green', command=lambda: self.save_location(update_location))
+                                             bg='green', command=lambda: self.save_location())
         self.ret_location_button.pack()
 
-        self.window.wait_window()
+        self.window.mainloop()
 
     def open_file(self):
         path = ""
@@ -46,10 +46,10 @@ class LocationChooser:
         self.ent1.delete(0, END)
         self.ent1.insert(0, self.location)
 
-    def save_location(self, update_location):
+    def save_location(self):
         self.location = self.ent1.get()
-        update_location(self.location)
         self.window.destroy()
+        return
 
 
 class PinInputter:
@@ -75,7 +75,7 @@ class PinInputter:
                                              bg='green', command=lambda: self.save_pin())
         self.ret_location_button.pack()
 
-        self.window.wait_window(self.window)
+        self.window.mainloop()
 
     def save_pin(self):
         self.pin = self.ent1.get()

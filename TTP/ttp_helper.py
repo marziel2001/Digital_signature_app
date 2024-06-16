@@ -1,12 +1,10 @@
 import rsa
 import globals
-import helper_gui
+import ttp_helper_gui
 import os
 
 
 class Helper():
-    def __init__(self):
-        self.location = ""
     def choose_file(self, what):
         return self.__choose__("file", what)
 
@@ -15,10 +13,6 @@ class Helper():
         return self.__choose__("directory", what)
 
 
-    def update_location(self, location):
-        self.location = location
-        print("updated location: " + location)
-
     def __choose__(self, location_type, what):
         if globals.GUI_MODE == 0:
             print("Please provide the drive letter or leave empty for current location")
@@ -26,7 +20,7 @@ class Helper():
             if location != "":
                 location += ":/"
         else:
-            location_selector = helper_gui.LocationChooser(location_type, what, self.update_location)
+            location_selector = helper_gui.LocationChooser(location_type, what)
             location = location_selector.location
             if location == "":
                 location = location + os.getcwd()
