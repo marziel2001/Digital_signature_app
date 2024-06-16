@@ -125,7 +125,7 @@ class Main:
 
         location = self.helper.choose_directory("for xml")
 
-        with open(location + "test.xml", "wb") as f:
+        with open(location + "signature.xml", "wb") as f:
             f.write(bxml)
 
     def sign_document(self, filename, priv_key_filename):

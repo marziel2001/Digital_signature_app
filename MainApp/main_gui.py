@@ -93,7 +93,7 @@ class MainGui(ttk.Frame):
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.tk.call("source", "../Azure/azure.tcl")
+    root.tk.call("source", "Azure/azure.tcl")
     root.tk.call("set_theme", "dark")
 
     app = MainGui(root)
