@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter.constants import *
 from tkinter import filedialog as fd
 from FrameCreator import FrameCreator
 

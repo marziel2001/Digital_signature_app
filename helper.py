@@ -4,12 +4,12 @@ import helper_gui
 import os
 
 
-class Helper():
+class Helper:
     def __init__(self):
         self.location = ""
+
     def choose_file(self, what):
         return self.__choose__("file", what)
-
 
     def choose_directory(self, what):
         return self.__choose__("directory", what)
@@ -36,18 +36,11 @@ class Helper():
         print("Location from __choose__: " + self.location)
         return self.location
 
-
-    def enter_pin(self):
-        pin = ""
-
-        if globals.GUI_MODE == 0:
-            print("Please enter your 4 digit PIN")
-            pin = input()
-        else:
-            pin = helper_gui.PinInputter().pin
-
+    @staticmethod
+    def enter_pin():
+        pin = helper_gui.PinInputter().pin
         return pin
 
-
-    def hash_pin(self, pin):
+    @staticmethod
+    def hash_pin(pin):
         return rsa.compute_hash(pin.encode('utf8'), 'SHA-256')

@@ -89,7 +89,8 @@ class Main:
             result.set("Plik jest oryginalny")
             print("Plik jest oryginalny")
 
-    def __hash_file__(self, file):
+    @staticmethod
+    def __hash_file__(file):
         with open(file, 'rb') as f:
             fb = f.read()
 
