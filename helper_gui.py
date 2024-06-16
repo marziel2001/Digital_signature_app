@@ -1,9 +1,10 @@
 import tkinter as tk
 from tkinter.constants import *
 from tkinter import filedialog as fd
+from FrameCreator import FrameCreator
+
 
 class LocationChooser:
-    location = ""
     location_type = "directory"
 
     def __init__(self, location_type, of_what, update_location):
@@ -11,26 +12,23 @@ class LocationChooser:
         self.window = tk.Toplevel()
         self.window.title("Choose_location")
 
-        self.window.rowconfigure([0, 1], weight=1, minsize=50)
-        self.window.columnconfigure([0, 1], weight=1, minsize=50)
+        self.window.rowconfigure([0], weight=1, minsize=50)
+        self.window.columnconfigure([0], weight=1, minsize=50)
 
-        self.frame1 = tk.Frame(master=self.window, bg='white')
-        self.frame1.grid(column=0, row=0, padx=10, pady=10, sticky="ns")
+        self.location = tk.StringVar()
 
-        self.label1 = tk.Label(text="Choose location of " + of_what, master=self.frame1, bg='white', font=("Arial"))
-        self.label1.pack(padx=5, pady=5)
-
-        self.ent1 = tk.Entry(fg='green', width=50, master=self.frame1)
-        self.ent1.pack()
-
-        self.btn2 = tk.Button(text="Browse", master=self.frame1, bg='yellow', command=lambda: self.open_file())
-        self.btn2.pack()
-
-        self.ret_location_button = tk.Button(text="save_location", master=self.frame1,
-                                             bg='green', command=lambda: self.save_location(update_location))
-        self.ret_location_button.pack()
+        self.frame1 = (FrameCreator(self.window, "Choosing location", 0, 0)
+                       .add_label("Choose location of " + of_what)
+                       .add_entry(self.location)
+                       .add_button("Browse", lambda: self.open_file())
+                       .add_button("Confirm", lambda: self.save_location(update_location))
+                       )
 
         self.window.wait_window()
+
+    def save_location(self, update_location):
+        update_location(self.location.get())
+        self.window.destroy()
 
     def open_file(self):
         path = ""
@@ -42,41 +40,29 @@ class LocationChooser:
         elif self.location_type == "directory":
             path = fd.askdirectory()
 
-        self.location = path
-        self.ent1.delete(0, END)
-        self.ent1.insert(0, self.location)
-
-    def save_location(self, update_location):
-        self.location = self.ent1.get()
-        update_location(self.location)
-        self.window.destroy()
+        self.location.set(path)
+        self.window.lift()
 
 
 class PinInputter:
-    pin = ""
 
     def __init__(self):
-        self.window = tk.Tk()
+        self.window = tk.Toplevel()
         self.window.title("Enter pin")
 
-        self.window.rowconfigure([0, 1], weight=1, minsize=50)
-        self.window.columnconfigure([0, 1], weight=1, minsize=50)
+        self.window.rowconfigure([0], weight=1, minsize=50)
+        self.window.columnconfigure([0], weight=1, minsize=50)
 
-        self.frame1 = tk.Frame(master=self.window, bg='white')
-        self.frame1.grid(column=0, row=0, padx=10, pady=10, sticky="ns")
+        self.pin = tk.StringVar()
 
-        self.label1 = tk.Label(text="Put in 4 digit pin", master=self.frame1, bg='white', font=("Arial"))
-        self.label1.pack(padx=5, pady=5)
-
-        self.ent1 = tk.Entry(fg='green', width=50, master=self.frame1, show="*")
-        self.ent1.pack()
-
-        self.ret_location_button = tk.Button(text="save", master=self.frame1,
-                                             bg='green', command=lambda: self.save_pin())
-        self.ret_location_button.pack()
+        self.frame1 = (FrameCreator(self.window, "Choosing pin", 0, 0)
+                       .add_label("Enter 4 digit pin")
+                       .add_entry(self.pin, show="*")
+                       .add_button("Save", lambda: self.save_pin())
+                       )
 
         self.window.wait_window(self.window)
 
     def save_pin(self):
-        self.pin = self.ent1.get()
+        self.pin = self.pin.get()
         self.window.destroy()
