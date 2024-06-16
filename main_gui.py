@@ -1,37 +1,8 @@
 from tkinter import ttk
 import tkinter as tk
 from tkinter import filedialog as fd
-from main import main
-
-
-class FrameCreator(ttk.LabelFrame):
-    def __init__(self, parent, text, column, row):
-        super().__init__(master=parent, text=text)
-        self.pack_propagate(True)
-        self.configure(width=400)
-        self.grid(column=column, row=row, columnspan=1, sticky=tk.NS, padx=15, pady=5, ipadx=15)
-        self.labels = []
-        self.entries = []
-        self.buttons = []
-
-    def add_label(self, text):
-        self.labels.append(ttk.Label(text=text, padding=5, master=self, font=("Arial", 12)))
-        self.labels[-1].pack(padx=5, pady=5)
-        return self
-
-    def add_entry(self, text_variable, disabled=False):
-        self.entries.append(ttk.Entry(width=30, textvariable=text_variable, master=self))
-        if disabled:
-            self.entries[-1].configure(state=tk.DISABLED)
-        self.entries[-1].pack(padx=5, pady=5)
-        return self
-
-    def add_button(self, text, function, style=""):
-        self.buttons.append(ttk.Button(width=10, text=text, padding=1, master=self, command=function))
-        if style != "":
-            self.buttons[-1].config(style=style)
-        self.buttons[-1].pack(padx=5, pady=5)
-        return self
+from main import Main
+from FrameCreator import FrameCreator
 
 
 class MainGui(ttk.Frame):
@@ -49,7 +20,7 @@ class MainGui(ttk.Frame):
         self.columnconfigure([0, 1], weight=1, minsize=50, uniform='a')
 
         self.configure()
-        self.m = main()
+        self.m = Main()
 
         # setup variables
         self.filename = tk.StringVar()
