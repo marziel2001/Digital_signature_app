@@ -75,6 +75,7 @@ class main():
 
 
     def verify_signature(self, file_to_check, signature_file, public_key):
+        loaded_pub_key = self.get_pub_key(public_key)
         with open(file_to_check, 'rb') as f:
             original = f.read()
 
@@ -82,7 +83,7 @@ class main():
             signature = f.read() # todo: change to separate function that reads signature from xml tag
 
         try:
-            rsa.verify(original, signature, public_key)
+            rsa.verify(original, signature, loaded_pub_key)
         except VerificationError:
             print("Plik został zmieniony!")
         else:
@@ -164,5 +165,3 @@ class main():
 #     if mode == '4':
 #         general_purpose_decrypt_rsa()
 #
-#     if mode == '5':
-#         create_xml()

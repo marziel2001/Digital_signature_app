@@ -30,7 +30,7 @@ class LocationChooser:
                                              bg='green', command=lambda: self.save_location())
         self.ret_location_button.pack()
 
-        self.window.mainloop()
+        self.window.wait_window()
 
     def open_file(self):
         path = ""

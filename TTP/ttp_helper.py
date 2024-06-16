@@ -5,6 +5,9 @@ import os
 
 
 class Helper():
+
+
+
     def choose_file(self, what):
         return self.__choose__("file", what)
 
@@ -20,7 +23,7 @@ class Helper():
             if location != "":
                 location += ":/"
         else:
-            location_selector = helper_gui.LocationChooser(location_type, what)
+            location_selector = ttp_helper_gui.LocationChooser(location_type, what)
             location = location_selector.location
             if location == "":
                 location = location + os.getcwd()
@@ -37,7 +40,7 @@ class Helper():
             print("Please enter your 4 digit PIN")
             pin = input()
         else:
-            pin = helper_gui.PinInputter().pin
+            pin = ttp_helper_gui.PinInputter().pin
 
         return pin
 

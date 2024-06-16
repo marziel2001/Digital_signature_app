@@ -2,7 +2,7 @@ import rsa
 from Cryptodome.Random import get_random_bytes
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad
-from helper import Helper
+from ttp_helper import Helper # todo sprobowac zmienic na zwykly helper ale dodac glowne okno do tej apki wtedy
 from globals import AES_BLOCK_SIZE
 from globals import RSA_KEY_SIZE
 
