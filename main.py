@@ -8,6 +8,7 @@ from helper import Helper
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from globals import AES_BLOCK_SIZE
+import os
 
 import tkinter as tk
 
@@ -95,28 +96,29 @@ class main():
         _hash = rsa.compute_hash(fb, 'SHA-256')
         return _hash
 
-    def create_xml(self):
+    def create_xml(self, filename, _hash):
         root = ET.Element('signature')
 
         document = ET.SubElement(root, 'document')
         size = ET.SubElement(document, 'size')
-        size.text = 'sizeeeee'
+        size.text = str(os.stat(filename).st_size)
 
         extension = ET.SubElement(document, 'extension')
-        extension.text = 'extensiooooooon'
+        extension.text = os.path.splitext(filename)[1]
 
         date_of_modification = ET.SubElement(document, 'mod-date')
-        date_of_modification.text = '1970-01-01'
+        date = os.path.getmtime(filename)
+        date_of_modification.text = datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
 
         user = ET.SubElement(root, 'user')
         name = ET.SubElement(user, 'name')
-        name.text = 'imie'
+        name.text = os.getlogin()
 
         hash = ET.SubElement(root, 'document-hash')
-        hash.text = 'tu bedzie hash'
+        hash.text = _hash
 
         time = ET.SubElement(root, 'timestamp')
-        time.text = str(datetime.now())
+        time.text = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         bxml = ET.tostring(root)
 
@@ -130,9 +132,9 @@ class main():
         loaded_priv_key = self.get_priv_key(priv_key_filename)
         _hash = self.__hash_file__(filename)
         signature = self.__sign_hash__(_hash, loaded_priv_key)
-
-        # todo: pass parameters and fill up the xml corretly
-        self.create_xml()
+        self.create_xml(filename, signature.hex())
 
         with open('signature.sha256.rsa', 'wb') as f:
             f.write(signature)
+
+
