@@ -1,3 +1,14 @@
 /priv.pem
 /pub.pem
 /priv.pem.aes
+/Azure/example.py
+/TTP/priv.pem.aes
+/TTP/pub.pem
+/schowek.py
+/signature.sha256.rsa
+/test.html
+/test.html.rsa
+/TTP/test.xml
+/test.xml
+/test_gui.py
+/test_old.html
