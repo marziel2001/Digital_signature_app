@@ -17,12 +17,12 @@ class FrameCreator(ttk.LabelFrame):
         return self
 
     def add_entry(self, text_variable, disabled=False, show=None):
-        self.entries.append(ttk.Entry(width=30, textvariable=text_variable, master=self))
+        self.entries.append(ttk.Entry(width=30, textvariable=text_variable, master=self, font=("Arial", 8)))
         if disabled:
             self.entries[-1].configure(state=tk.DISABLED)
         if show == "*":
             self.entries[-1].configure(show="*")
-        self.entries[-1].pack(padx=5, pady=5)
+        self.entries[-1].pack(padx=2, pady=2)
         return self
 
     def add_button(self, text, function, style=""):
