@@ -25,14 +25,12 @@ class main():
 
         return privkey2reloaded
 
-
     def get_pub_key(self, filepath):
         with open(filepath) as f:
             pub_key_2 = f.read()
 
         pub_key_2_reloaded = rsa.PublicKey.load_pkcs1(pub_key_2.encode('utf8'))
         return pub_key_2_reloaded
-
 
     def decipher_w_aes(self, encrypted_content, PIN):
         key = self.helper.hash_pin(PIN)
@@ -42,7 +40,6 @@ class main():
         decrypted_content = cipher.decrypt(encrypted_content)
         unpadded_content = unpad(decrypted_content, AES_BLOCK_SIZE)
         return unpadded_content
-
 
     def __sign_hash__(self, hash, key):
         signature = rsa.sign_hash(hash, key, 'SHA-256')
@@ -59,7 +56,6 @@ class main():
         with open(filename + ".rsa", 'wb') as f:
             f.write(encrypted_content)
 
-
     def general_purpose_decrypt_rsa(self, encrypted_content_filename, priv_key):
         loaded_priv_key = self.get_priv_key(priv_key)
 
@@ -73,14 +69,19 @@ class main():
 
         return decrypted_content
 
-
     def verify_signature(self, file_to_check, signature_file, public_key):
         loaded_pub_key = self.get_pub_key(public_key)
         with open(file_to_check, 'rb') as f:
             original = f.read()
 
-        with open(signature_file, 'rb') as f:
-            signature = f.read() # todo: change to separate function that reads signature from xml tag
+
+        xml_file = signature_file
+
+        tree = ET.parse(xml_file)
+        root  = tree.getroot()
+        hash = root.find('document-hash').text
+
+        signature = bytes.fromhex(hash)
 
         try:
             rsa.verify(original, signature, loaded_pub_key)
