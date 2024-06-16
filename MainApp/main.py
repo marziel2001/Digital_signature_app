@@ -3,10 +3,10 @@ from rsa import VerificationError
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import unpad
 
-from helper import Helper
+from Common.helper import Helper
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from globals import AES_BLOCK_SIZE
+from Common.globals import AES_BLOCK_SIZE
 import os
 
 
@@ -134,5 +134,5 @@ class Main:
         signature = self.__sign_hash__(_hash, loaded_priv_key)
         self.create_xml(filename, signature.hex())
 
-        with open('signature.sha256.rsa', 'wb') as f:
+        with open('../signature.sha256.rsa', 'wb') as f:
             f.write(signature)

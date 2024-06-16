@@ -2,9 +2,9 @@ import rsa
 from Cryptodome.Random import get_random_bytes
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import pad
-from ttp_helper import Helper # todo sprobowac zmienic na zwykly helper ale dodac glowne okno do tej apki wtedy
-from globals import AES_BLOCK_SIZE
-from globals import RSA_KEY_SIZE
+from Common.helper import Helper
+from Common.globals import AES_BLOCK_SIZE
+from Common.globals import RSA_KEY_SIZE
 
 
 class ttp():
@@ -19,7 +19,6 @@ class ttp():
         encrypted_content = cipher.encrypt(content)
         result = iv + encrypted_content
         return result
-
 
     def generate_and_save_keys(self):
         location = self.helper.choose_directory("where to save keys")

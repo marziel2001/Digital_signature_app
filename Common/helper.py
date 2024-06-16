@@ -1,6 +1,6 @@
 import rsa
-import globals
-import helper_gui
+from Common.helper_gui import LocationChooser
+from Common.helper_gui import PinInputter
 import os
 
 
@@ -19,18 +19,12 @@ class Helper:
         print("updated location: " + location)
 
     def __choose__(self, location_type, what):
-        if globals.GUI_MODE == 0:
-            print("Please provide the drive letter or leave empty for current location")
-            location = input()
-            if location != "":
-                location += ":/"
-        else:
-            location_selector = helper_gui.LocationChooser(location_type, what, self.update_location)
+        location_selector = LocationChooser(location_type, what, self.update_location)
 
-            #location = location_selector.location.get()
+        #location = location_selector.location.get()
 
-            if self.location == "":
-                self.location = self.location + os.getcwd()
+        if self.location == "":
+            self.location = self.location + os.getcwd()
 
         self.location = self.location + "/"
         print("Location from __choose__: " + self.location)
@@ -38,7 +32,7 @@ class Helper:
 
     @staticmethod
     def enter_pin():
-        pin = helper_gui.PinInputter().pin
+        pin = PinInputter().pin
         return pin
 
     @staticmethod

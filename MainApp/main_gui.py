@@ -2,7 +2,7 @@ from tkinter import ttk
 import tkinter as tk
 from tkinter import filedialog as fd
 from main import Main
-from FrameCreator import FrameCreator
+from Common.FrameCreator import FrameCreator
 
 
 class MainGui(ttk.Frame):
@@ -42,8 +42,7 @@ class MainGui(ttk.Frame):
                              .add_button("Browse", lambda: self.choose_file(self.priv_key_filename))
                              .add_button("Sign", lambda: self.m.sign_document(self.filename.get(),
                                                                               self.priv_key_filename.get()),
-                             style='Accent.TButton'))
-
+                                         style='Accent.TButton'))
 
         # part 2
         self.VerificationFrame = (FrameCreator(self, "Signature Verification", 0, 1)
@@ -60,7 +59,7 @@ class MainGui(ttk.Frame):
                                                                                         self.signature_file.get(),
                                                                                         self.pub_key_filename.get(),
                                                                                         self.verify_status),
-                                  style='Accent.TButton')
+                                              style='Accent.TButton')
                                   .add_entry(self.verify_status, disabled=True)
                                   )
 
@@ -75,7 +74,7 @@ class MainGui(ttk.Frame):
                                 .add_button("Encrypt",
                                             lambda: self.m.general_purpose_encrypt_rsa(self.file_to_encrypt.get(),
                                                                                        self.pub_key_filename.get()),
-                                style='Accent.TButton')
+                                            style='Accent.TButton')
                                 )
         # part 4
         self.DecryptionFrame = (FrameCreator(self, "File Decryption", 1, 1)
@@ -88,12 +87,12 @@ class MainGui(ttk.Frame):
                                 .add_button("Decrypt",
                                             lambda: self.m.general_purpose_decrypt_rsa(self.file_to_decrypt.get(),
                                                                                        self.priv_key_filename.get()),
-                                style='Accent.TButton')
+                                            style='Accent.TButton')
                                 )
 
 
 root = tk.Tk()
-root.tk.call("source", "Azure/azure.tcl")
+root.tk.call("source", "../Azure/azure.tcl")
 root.tk.call("set_theme", "dark")
 
 app = MainGui(root)

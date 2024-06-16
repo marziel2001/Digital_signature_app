@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog as fd
-from FrameCreator import FrameCreator
+from Common.FrameCreator import FrameCreator
 
 
 class LocationChooser:
@@ -9,6 +9,7 @@ class LocationChooser:
     def __init__(self, location_type, of_what, update_location):
         self.location_type = location_type
         self.window = tk.Toplevel()
+        self.window.after(1000, self.window.lift())
         self.window.title("Choose_location")
 
         self.window.rowconfigure([0], weight=1, minsize=50)
