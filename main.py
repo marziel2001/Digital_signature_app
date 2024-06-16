@@ -69,7 +69,7 @@ class main():
 
         return decrypted_content
 
-    def verify_signature(self, file_to_check, signature_file, public_key):
+    def verify_signature(self, file_to_check, signature_file, public_key, result):
         loaded_pub_key = self.get_pub_key(public_key)
         with open(file_to_check, 'rb') as f:
             original = f.read()
@@ -86,8 +86,10 @@ class main():
         try:
             rsa.verify(original, signature, loaded_pub_key)
         except VerificationError:
+            result.set("Plik został zmieniony!")
             print("Plik został zmieniony!")
         else:
+            result.set("Plik jest oryginalny")
             print("Plik jest oryginalny")
 
     def __hash_file__(self, file):

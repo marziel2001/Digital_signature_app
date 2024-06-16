@@ -6,8 +6,10 @@ from main import main
 
 class FrameCreator(ttk.LabelFrame):
     def __init__(self, parent, text, column, row):
-        super().__init__(master=parent, text=text, padding=5, height=100)
-        self.grid(column=column, row=row, columnspan=1, sticky=tk.NSEW)
+        super().__init__(master=parent, text=text)
+        self.pack_propagate(True)
+        self.configure(width=400)
+        self.grid(column=column, row=row, columnspan=1, sticky=tk.NS, padx=15, pady=5, ipadx=15)
         self.labels = []
         self.entries = []
         self.buttons = []
@@ -17,8 +19,10 @@ class FrameCreator(ttk.LabelFrame):
         self.labels[-1].pack(padx=5, pady=5)
         return self
 
-    def add_entry(self, text_variable):
+    def add_entry(self, text_variable, disabled=False):
         self.entries.append(ttk.Entry(width=30, textvariable=text_variable, master=self))
+        if disabled:
+            self.entries[-1].configure(state=tk.DISABLED)
         self.entries[-1].pack(padx=5, pady=5)
         return self
 
@@ -37,18 +41,22 @@ class MainGui(ttk.Frame):
         ))
 
     def __init__(self, parent):
-        ttk.Frame.__init__(self)
+        tk.Frame.__init__(self)
+        self.rowconfigure([0], weight=1, minsize=50, uniform='a')
+        self.rowconfigure([1], weight=1, minsize=50, uniform='b')
 
-        self.m = main()
-
-        self.rowconfigure([0, 1], weight=1, minsize=50, uniform='a')
         self.columnconfigure([0, 1], weight=1, minsize=50, uniform='a')
+        self.columnconfigure([0, 1], weight=1, minsize=50, uniform='a')
+
+        self.configure()
+        self.m = main()
 
         # setup variables
         self.filename = tk.StringVar()
         self.priv_key_filename = tk.StringVar()
         self.pub_key_filename = tk.StringVar()
         self.file_to_verify = tk.StringVar()
+        self.verify_status = tk.StringVar()
         self.signature_file = tk.StringVar()
         self.file_to_encrypt = tk.StringVar()
         self.file_to_decrypt = tk.StringVar()
@@ -79,9 +87,10 @@ class MainGui(ttk.Frame):
                                   .add_button("Browse", lambda: self.choose_file(self.pub_key_filename))
                                   .add_button("Verify", lambda: self.m.verify_signature(self.file_to_verify.get(),
                                                                                         self.signature_file.get(),
-                                                                                        self.pub_key_filename.get()),
+                                                                                        self.pub_key_filename.get(),
+                                                                                        self.verify_status),
                                   style='Accent.TButton')
-                                  # todo make result visible in the entry
+                                  .add_entry(self.verify_status, disabled=True)
                                   )
 
         # part 3
@@ -115,8 +124,13 @@ class MainGui(ttk.Frame):
 root = tk.Tk()
 root.tk.call("source", "Azure/azure.tcl")
 root.tk.call("set_theme", "dark")
+
 app = MainGui(root)
-root.title("BSK project main window - 191005 Marcel Zieliński")
-root.configure()
-app.pack(fill=tk.BOTH, expand=True)
+
+root.title("BSK project - 191005 Marcel Zieliński")
+root.configure(width=1200, height=900)
+
+root.pack_propagate(False)
+app.pack(expand=True, fill=tk.Y)
+
 root.mainloop()
