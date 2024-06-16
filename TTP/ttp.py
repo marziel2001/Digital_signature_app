@@ -35,5 +35,5 @@ class ttp():
         with open(location + 'priv.pem.aes', 'wb') as f:
             f.write(encrypted_key)
 
-
-ttp().generate_and_save_keys()
+if __name__ == "__main__":
+    ttp().generate_and_save_keys()

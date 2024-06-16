@@ -91,16 +91,18 @@ class MainGui(ttk.Frame):
                                 )
 
 
-root = tk.Tk()
-root.tk.call("source", "../Azure/azure.tcl")
-root.tk.call("set_theme", "dark")
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.tk.call("source", "../Azure/azure.tcl")
+    root.tk.call("set_theme", "dark")
 
-app = MainGui(root)
+    app = MainGui(root)
 
-root.title("BSK project - 191005 Marcel Zieliński")
-root.configure(width=1200, height=900)
+    root.title("BSK project - 191005 Marcel Zieliński")
+    root.configure(width=1200, height=900)
 
-root.pack_propagate(False)
-app.pack(expand=True, fill=tk.Y)
+    root.pack_propagate(False)
+    app.pack(expand=True, fill=tk.Y)
 
-root.mainloop()
+    root.mainloop()
+
