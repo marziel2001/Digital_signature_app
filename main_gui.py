@@ -41,7 +41,7 @@ class MainGui(ttk.Frame):
         ))
 
     def __init__(self, parent):
-        tk.Frame.__init__(self)
+        ttk.Frame.__init__(self)
         self.rowconfigure([0], weight=1, minsize=50, uniform='a')
         self.rowconfigure([1], weight=1, minsize=50, uniform='b')
 
