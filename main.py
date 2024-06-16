@@ -3,18 +3,16 @@ from rsa import VerificationError
 from Cryptodome.Cipher import AES
 from Cryptodome.Util.Padding import unpad
 
-import globals
 from helper import Helper
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from globals import AES_BLOCK_SIZE
 import os
 
-import tkinter as tk
 
-class main():
+class Main:
     def __init__(self):
-            self.helper = Helper()
+        self.helper = Helper()
 
     def get_priv_key(self, filepath):
         with open(filepath, "rb") as f:
@@ -41,8 +39,9 @@ class main():
         unpadded_content = unpad(decrypted_content, AES_BLOCK_SIZE)
         return unpadded_content
 
-    def __sign_hash__(self, hash, key):
-        signature = rsa.sign_hash(hash, key, 'SHA-256')
+    @staticmethod
+    def __sign_hash__(_hash, key):
+        signature = rsa.sign_hash(_hash, key, 'SHA-256')
         return signature
 
     def general_purpose_encrypt_rsa(self, filename, public_key):
@@ -74,14 +73,12 @@ class main():
         with open(file_to_check, 'rb') as f:
             original = f.read()
 
-
         xml_file = signature_file
-
         tree = ET.parse(xml_file)
-        root  = tree.getroot()
-        hash = root.find('document-hash').text
+        root = tree.getroot()
+        _hash = root.find('document-hash').text
 
-        signature = bytes.fromhex(hash)
+        signature = bytes.fromhex(_hash)
 
         try:
             rsa.verify(original, signature, loaded_pub_key)
@@ -125,7 +122,6 @@ class main():
 
         bxml = ET.tostring(root)
 
-
         location = self.helper.choose_directory("for xml")
 
         with open(location + "test.xml", "wb") as f:
@@ -139,5 +135,3 @@ class main():
 
         with open('signature.sha256.rsa', 'wb') as f:
             f.write(signature)
-
-
