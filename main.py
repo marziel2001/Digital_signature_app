@@ -47,26 +47,25 @@ class main():
         signature = rsa.sign_hash(hash, key, 'SHA-256')
         return signature
 
-
-    def general_purpose_encrypt_rsa(self, filename="test.html"):
-        pub_key = self.get_pub_key()
+    def general_purpose_encrypt_rsa(self, filename, public_key):
+        loaded_pub_key = self.get_pub_key(public_key)
 
         with open(filename, 'rb') as f:
             fb = f.read()
 
-        encrypted_content = rsa.encrypt(fb, pub_key)
+        encrypted_content = rsa.encrypt(fb, loaded_pub_key)
 
         with open(filename + ".rsa", 'wb') as f:
             f.write(encrypted_content)
 
 
-    def general_purpose_decrypt_rsa(self, encrypted_content_filename="test.html.rsa"):
+    def general_purpose_decrypt_rsa(self, encrypted_content_filename, priv_key):
+        loaded_priv_key = self.get_priv_key(priv_key)
+
         with open(encrypted_content_filename, 'rb') as f:
             fb = f.read()
 
-        priv_key = self.get_priv_key()
-
-        decrypted_content = rsa.decrypt(fb, priv_key)
+        decrypted_content = rsa.decrypt(fb, loaded_priv_key)
 
         with open(encrypted_content_filename.removesuffix('.rsa'), 'wb') as f:
             f.write(decrypted_content)
@@ -89,14 +88,12 @@ class main():
         else:
             print("Plik jest oryginalny")
 
-
     def __hash_file__(self, file):
         with open(file, 'rb') as f:
             fb = f.read()
 
         _hash = rsa.compute_hash(fb, 'SHA-256')
         return _hash
-
 
     def create_xml(self):
         root = ET.Element('signature')
@@ -139,29 +136,3 @@ class main():
 
         with open('signature.sha256.rsa', 'wb') as f:
             f.write(signature)
-
-#
-# if globals.GUI_MODE == 0:
-#     print("Enter mode:\n" +
-#           "1. Signing a document\n" +
-#           "2. Veryfying signature\n" +
-#           "3. Test general purpose encryption \n" +
-#           "4. Test general purpose decryption \n" +
-#           "5. Generate XML document\n")
-#
-#     mode = input()
-#
-#     if mode == '1':
-#         filename = input("Enter filename to sign")
-#         sign_document(filename)
-#
-#     if mode == '2':
-#         filename = input("Enter filename to verify")
-#         verify_signature(filename, "signature.sha256.rsa", get_pub_key())
-#
-#     if mode == '3':
-#         general_purpose_encrypt_rsa()
-#
-#     if mode == '4':
-#         general_purpose_decrypt_rsa()
-#
