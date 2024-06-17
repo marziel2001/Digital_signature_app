@@ -28,6 +28,8 @@ class MainGui(ttk.Frame):
         self.pub_key_filename = tk.StringVar()
         self.file_to_verify = tk.StringVar()
         self.verify_status = tk.StringVar()
+        self.encrypt_status = tk.StringVar()
+        self.decrypt_status = tk.StringVar()
         self.signature_file = tk.StringVar()
         self.file_to_encrypt = tk.StringVar()
         self.file_to_decrypt = tk.StringVar()
@@ -73,8 +75,10 @@ class MainGui(ttk.Frame):
                                 .add_button("Browse", lambda: self.choose_file(self.pub_key_filename))
                                 .add_button("Encrypt",
                                             lambda: self.m.general_purpose_encrypt_rsa(self.file_to_encrypt.get(),
-                                                                                       self.pub_key_filename.get()),
+                                                                                       self.pub_key_filename.get(),
+                                                                                       self.encrypt_status),
                                             style='Accent.TButton')
+                                .add_entry(self.encrypt_status, disabled=True)
                                 )
         # part 4
         self.DecryptionFrame = (FrameCreator(self, "File Decryption", 1, 1)
@@ -86,8 +90,10 @@ class MainGui(ttk.Frame):
                                 .add_button("Browse", lambda: self.choose_file(self.priv_key_filename))
                                 .add_button("Decrypt",
                                             lambda: self.m.general_purpose_decrypt_rsa(self.file_to_decrypt.get(),
-                                                                                       self.priv_key_filename.get()),
+                                                                                       self.priv_key_filename.get(),
+                                                                                       self.decrypt_status),
                                             style='Accent.TButton')
+                                .add_entry(self.decrypt_status, disabled=True)
                                 )
 
 

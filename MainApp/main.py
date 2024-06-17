@@ -44,7 +44,7 @@ class Main:
         signature = rsa.sign_hash(_hash, key, 'SHA-256')
         return signature
 
-    def general_purpose_encrypt_rsa(self, filename, public_key):
+    def general_purpose_encrypt_rsa(self, filename, public_key, result):
         loaded_pub_key = self.get_pub_key(public_key)
 
         with open(filename, 'rb') as f:
@@ -55,7 +55,9 @@ class Main:
         with open(filename + ".rsa", 'wb') as f:
             f.write(encrypted_content)
 
-    def general_purpose_decrypt_rsa(self, encrypted_content_filename, priv_key):
+        result.set("encrypted!")
+
+    def general_purpose_decrypt_rsa(self, encrypted_content_filename, priv_key, result):
         loaded_priv_key = self.get_priv_key(priv_key)
 
         with open(encrypted_content_filename, 'rb') as f:
@@ -65,6 +67,8 @@ class Main:
 
         with open(encrypted_content_filename.removesuffix('.rsa'), 'wb') as f:
             f.write(decrypted_content)
+
+        result.set("decrypted!")
 
         return decrypted_content
 
